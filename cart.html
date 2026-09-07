@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MyStore | Cart</title>
@@ -41,13 +40,15 @@ nav a{
     color:white;
     text-decoration:none;
     margin-left:20px;
-    font-weight:bold;
 }
 
-.container{
-    max-width:900px;
+.cart{
+    max-width:800px;
     margin:50px auto;
-    padding:20px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.1);
 }
 
 h1{
@@ -56,98 +57,78 @@ h1{
 }
 
 .cart-item{
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    margin-bottom:20px;
     display:flex;
     align-items:center;
     gap:20px;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    padding:20px 0;
+    border-bottom:1px solid #ddd;
 }
 
 .cart-item img{
-    width:120px;
-    height:120px;
+    width:100px;
+    height:100px;
     object-fit:cover;
     border-radius:10px;
 }
 
-.info{
+.item-info{
     flex:1;
 }
 
-.info h2{
+.item-info h3{
     margin-bottom:10px;
-}
-
-.price{
-    color:#6C63FF;
-    font-size:21px;
-    font-weight:bold;
 }
 
 .quantity{
     display:flex;
     align-items:center;
-    gap:12px;
-    margin-top:15px;
+    gap:10px;
 }
 
 .quantity button{
-    width:35px;
-    height:35px;
+    width:32px;
+    height:32px;
     border:none;
+    border-radius:6px;
     background:#6C63FF;
     color:white;
-    border-radius:6px;
-    font-size:20px;
     cursor:pointer;
 }
 
 .remove{
     border:none;
-    background:#ff4d4d;
+    background:#e74c3c;
     color:white;
-    padding:10px 15px;
-    border-radius:7px;
+    padding:8px 12px;
+    border-radius:6px;
     cursor:pointer;
 }
 
 .total{
-    background:white;
-    padding:25px;
-    border-radius:15px;
     text-align:right;
-    font-size:25px;
+    font-size:26px;
     font-weight:bold;
-    margin-top:20px;
+    color:#6C63FF;
+    margin-top:25px;
 }
 
 .checkout{
     display:block;
-    margin-top:20px;
-    padding:15px;
+    text-align:center;
     background:#6C63FF;
     color:white;
-    text-align:center;
     text-decoration:none;
+    padding:15px;
     border-radius:10px;
-    font-size:18px;
-}
-
-.checkout:hover{
-    background:#4A90E2;
+    margin-top:25px;
 }
 
 .empty{
-    background:white;
-    padding:50px;
-    border-radius:15px;
     text-align:center;
+    padding:30px;
 }
 
-.empty a{
+.shop{
     display:inline-block;
     margin-top:20px;
     background:#6C63FF;
@@ -157,271 +138,236 @@ h1{
     border-radius:8px;
 }
 
-@media(max-width:600px){
-
-    header{
-        flex-direction:column;
-        gap:15px;
-    }
-
-    .cart-item{
-        flex-direction:column;
-        text-align:center;
-    }
-
-    .quantity{
-        justify-content:center;
-    }
-
-}
-
 </style>
 
 </head>
 
-
 <body>
-
 
 <header>
 
-    <div class="logo">
-        MyStore
-    </div>
+<div class="logo">
+MyStore
+</div>
 
-    <nav>
+<nav>
 
-        <a href="index.html">
-            Home
-        </a>
+<a href="index.html">
+Home
+</a>
 
-        <a href="cart.html">
-            🛒 Cart
-        </a>
+<a href="cart.html">
+🛒 Cart
+</a>
 
-    </nav>
+</nav>
 
 </header>
 
 
-<div class="container">
+<div class="cart">
 
-    <h1>
-        🛒 Your Cart
-    </h1>
+<h1>🛒 Your Cart</h1>
 
-    <div id="cart-container"></div>
+<div id="cart-items"></div>
+
+<div
+class="total"
+id="cart-total">
+Total: $0
+</div>
+
+<a
+href="checkout.html"
+class="checkout"
+id="checkout-button">
+Proceed to Checkout
+</a>
 
 </div>
 
 
 <script>
 
-
-/* GET CART */
-
 function getCart(){
 
-    return JSON.parse(
-        localStorage.getItem("cart")
-    ) || [];
+return JSON.parse(
+localStorage.getItem("cart")
+) || [];
 
 }
 
 
-/* DISPLAY CART */
+function saveCart(cart){
+
+localStorage.setItem(
+"cart",
+JSON.stringify(cart)
+);
+
+}
+
 
 function displayCart(){
 
-    let cart = getCart();
+let cart = getCart();
 
-    let container =
-        document.getElementById(
-            "cart-container"
-        );
+let container =
+document.getElementById("cart-items");
 
+let total = 0;
 
-    /* EMPTY CART */
-
-    if(cart.length === 0){
-
-        container.innerHTML = `
-
-            <div class="empty">
-
-                <h2>
-                    Your cart is empty 🛒
-                </h2>
-
-                <a href="index.html">
-                    Continue Shopping
-                </a>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
+container.innerHTML = "";
 
 
-    let html = "";
+if(cart.length === 0){
 
-    let total = 0;
+container.innerHTML = `
 
+<div class="empty">
 
-    /* PRODUCTS */
+<h2>Your cart is empty</h2>
 
-    cart.forEach(function(product,index){
+<a
+href="index.html"
+class="shop">
+Shop Now
+</a>
 
-        let quantity =
-            product.quantity || 1;
+</div>
 
-        let itemTotal =
-            product.price * quantity;
+`;
 
-        total += itemTotal;
+document.getElementById(
+"cart-total"
+).innerText = "Total: $0";
 
+document.getElementById(
+"checkout-button"
+).style.display = "none";
 
-        html += `
-
-            <div class="cart-item">
-
-                <img
-                    src="${product.image}"
-                    alt="${product.name}">
-
-
-                <div class="info">
-
-                    <h2>
-                        ${product.name}
-                    </h2>
-
-                    <div class="price">
-                        $${product.price}
-                    </div>
-
-
-                    <div class="quantity">
-
-                        <button
-                            onclick="changeQuantity(${index},-1)">
-                            −
-                        </button>
-
-                        <span>
-                            Quantity: ${quantity}
-                        </span>
-
-                        <button
-                            onclick="changeQuantity(${index},1)">
-                            +
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="remove"
-                    onclick="removeProduct(${index})">
-
-                    Remove
-
-                </button>
-
-            </div>
-
-        `;
-
-    });
-
-
-    /* TOTAL */
-
-    html += `
-
-        <div class="total">
-
-            Total: $${total}
-
-        </div>
-
-
-        <a
-            href="checkout.html"
-            class="checkout">
-
-            Proceed to Checkout →
-
-        </a>
-
-    `;
-
-
-    container.innerHTML = html;
+return;
 
 }
 
 
-/* CHANGE QUANTITY */
+document.getElementById(
+"checkout-button"
+).style.display = "block";
+
+
+cart.forEach(function(product,index){
+
+let quantity =
+product.quantity || 1;
+
+let itemTotal =
+product.price * quantity;
+
+total += itemTotal;
+
+
+container.innerHTML += `
+
+<div class="cart-item">
+
+<img
+src="${product.image}"
+alt="${product.name}"
+>
+
+<div class="item-info">
+
+<h3>
+${product.name}
+</h3>
+
+<p>
+$${product.price} each
+</p>
+
+</div>
+
+<div class="quantity">
+
+<button
+onclick="changeQuantity(${index},-1)">
+-
+</button>
+
+<span>
+${quantity}
+</span>
+
+<button
+onclick="changeQuantity(${index},1)">
++
+</button>
+
+</div>
+
+<strong>
+$${itemTotal}
+</strong>
+
+<button
+class="remove"
+onclick="removeProduct(${index})">
+Remove
+</button>
+
+</div>
+
+`;
+
+});
+
+
+document.getElementById(
+"cart-total"
+).innerText =
+"Total: $" + total;
+
+}
+
 
 function changeQuantity(index,change){
 
-    let cart = getCart();
+let cart = getCart();
+
+cart[index].quantity += change;
 
 
-    cart[index].quantity += change;
+if(cart[index].quantity <= 0){
 
-
-    if(cart[index].quantity <= 0){
-
-        cart.splice(index,1);
-
-    }
-
-
-    localStorage.setItem(
-        "cart",
-        JSON.stringify(cart)
-    );
-
-
-    displayCart();
+cart.splice(index,1);
 
 }
 
 
-/* REMOVE PRODUCT */
+saveCart(cart);
+
+displayCart();
+
+}
+
 
 function removeProduct(index){
 
-    let cart = getCart();
+let cart = getCart();
 
+cart.splice(index,1);
 
-    cart.splice(index,1);
+saveCart(cart);
 
-
-    localStorage.setItem(
-        "cart",
-        JSON.stringify(cart)
-    );
-
-
-    displayCart();
+displayCart();
 
 }
 
-
-/* START */
 
 displayCart();
 
 </script>
-
 
 </body>
 
