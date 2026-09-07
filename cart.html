@@ -1,54 +1,427 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shopping Cart</title>
+<title>MyStore | Cart</title>
 
-<link rel="stylesheet"
-href="css/style.css">
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f5f7fa;
+    color:#333;
+}
+
+header{
+    background:linear-gradient(135deg,#6C63FF,#4A90E2);
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+.container{
+    max-width:900px;
+    margin:50px auto;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.cart-item{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.cart-item img{
+    width:120px;
+    height:120px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+.info{
+    flex:1;
+}
+
+.info h2{
+    margin-bottom:10px;
+}
+
+.price{
+    color:#6C63FF;
+    font-size:21px;
+    font-weight:bold;
+}
+
+.quantity{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:15px;
+}
+
+.quantity button{
+    width:35px;
+    height:35px;
+    border:none;
+    background:#6C63FF;
+    color:white;
+    border-radius:6px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.remove{
+    border:none;
+    background:#ff4d4d;
+    color:white;
+    padding:10px 15px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.total{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    text-align:right;
+    font-size:25px;
+    font-weight:bold;
+    margin-top:20px;
+}
+
+.checkout{
+    display:block;
+    margin-top:20px;
+    padding:15px;
+    background:#6C63FF;
+    color:white;
+    text-align:center;
+    text-decoration:none;
+    border-radius:10px;
+    font-size:18px;
+}
+
+.checkout:hover{
+    background:#4A90E2;
+}
+
+.empty{
+    background:white;
+    padding:50px;
+    border-radius:15px;
+    text-align:center;
+}
+
+.empty a{
+    display:inline-block;
+    margin-top:20px;
+    background:#6C63FF;
+    color:white;
+    padding:12px 20px;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+@media(max-width:600px){
+
+    header{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .cart-item{
+        flex-direction:column;
+        text-align:center;
+    }
+
+    .quantity{
+        justify-content:center;
+    }
+
+}
+
+</style>
 
 </head>
 
+
 <body>
+
 
 <header>
 
-<h1 style="padding:20px">
+    <div class="logo">
+        MyStore
+    </div>
 
-🛒 Shopping Cart
+    <nav>
 
-</h1>
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="cart.html">
+            🛒 Cart
+        </a>
+
+    </nav>
 
 </header>
 
-<div id="cart-items">
+
+<div class="container">
+
+    <h1>
+        🛒 Your Cart
+    </h1>
+
+    <div id="cart-container"></div>
 
 </div>
 
-<h2 style="text-align:center;margin:30px;">
 
-Grand Total :
+<script>
 
-$<span id="total">0</span>
 
-</h2>
+/* GET CART */
 
-<div style="text-align:center;margin-bottom:50px;">
+function getCart(){
 
-<a href="checkout.html" class="btn">
-Proceed to Checkout
-</a>
+    return JSON.parse(
+        localStorage.getItem("cart")
+    ) || [];
 
-</div>
+}
 
-<script src="js/cart.js"></script>
+
+/* DISPLAY CART */
+
+function displayCart(){
+
+    let cart = getCart();
+
+    let container =
+        document.getElementById(
+            "cart-container"
+        );
+
+
+    /* EMPTY CART */
+
+    if(cart.length === 0){
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                <h2>
+                    Your cart is empty 🛒
+                </h2>
+
+                <a href="index.html">
+                    Continue Shopping
+                </a>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    let html = "";
+
+    let total = 0;
+
+
+    /* PRODUCTS */
+
+    cart.forEach(function(product,index){
+
+        let quantity =
+            product.quantity || 1;
+
+        let itemTotal =
+            product.price * quantity;
+
+        total += itemTotal;
+
+
+        html += `
+
+            <div class="cart-item">
+
+                <img
+                    src="${product.image}"
+                    alt="${product.name}">
+
+
+                <div class="info">
+
+                    <h2>
+                        ${product.name}
+                    </h2>
+
+                    <div class="price">
+                        $${product.price}
+                    </div>
+
+
+                    <div class="quantity">
+
+                        <button
+                            onclick="changeQuantity(${index},-1)">
+                            −
+                        </button>
+
+                        <span>
+                            Quantity: ${quantity}
+                        </span>
+
+                        <button
+                            onclick="changeQuantity(${index},1)">
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="remove"
+                    onclick="removeProduct(${index})">
+
+                    Remove
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+
+    /* TOTAL */
+
+    html += `
+
+        <div class="total">
+
+            Total: $${total}
+
+        </div>
+
+
+        <a
+            href="checkout.html"
+            class="checkout">
+
+            Proceed to Checkout →
+
+        </a>
+
+    `;
+
+
+    container.innerHTML = html;
+
+}
+
+
+/* CHANGE QUANTITY */
+
+function changeQuantity(index,change){
+
+    let cart = getCart();
+
+
+    cart[index].quantity += change;
+
+
+    if(cart[index].quantity <= 0){
+
+        cart.splice(index,1);
+
+    }
+
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+
+    displayCart();
+
+}
+
+
+/* REMOVE PRODUCT */
+
+function removeProduct(index){
+
+    let cart = getCart();
+
+
+    cart.splice(index,1);
+
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+
+    displayCart();
+
+}
+
+
+/* START */
+
+displayCart();
+
+</script>
+
 
 </body>
 
